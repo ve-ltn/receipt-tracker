@@ -23,4 +23,8 @@ OCR-powered expense tracking application built with Python, Streamlit, EasyOCR, 
 - NumPy
 
 ## Try It Yourself!
-You can test the application using the sample receipt from https://postimg.cc/R68vV81N
+You can test the application using the sample receipt available at:
+🔗 https://postimg.cc/R68vV81N
+The same sample image is also included in this repository under:
+📁 `receipt samples/` under the name example1.jpeg
+Simply download or open the image, then upload it to the application to try the OCR and expense tracking features.
