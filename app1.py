@@ -1,12 +1,12 @@
 import streamlit as st
-import pytesseract
+import easyocr
+import numpy as np
 from PIL import Image
 import pandas as pd
 import os
 import re
 
-# Set Tesseract executable path
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+reader = easyocr.Reader(['en'], gpu=False)
 
 # Atur directory untuk menyimpan history pengeluaran
 history_directory = "data"
@@ -16,13 +16,24 @@ if not os.path.exists(history_directory):
 # Fungsi untuk analisis OCR
 def process_receipt(image):
     try:
-        text = pytesseract.image_to_string(image)
-        text = re.sub(r'(\d), (\d)', r'\1\2', text)  # menghilangkan spasi antar digit dan koma
-        text = re.sub(r'(\d),(\d)', r'\1\2', text)  
-        # Membersihkan data
+        image_np = np.array(image)
+
+        results = reader.readtext(image_np, detail=0)
+
+        text = "\n".join(results)
+
+        text = re.sub(r'(\d), (\d)', r'\1\2', text)
+        text = re.sub(r'(\d),(\d)', r'\1\2', text)
+
         lines = text.split('\n')
-        cleaned_lines = [line.strip() for line in lines if line.strip()]  # Hapus baris kosong atau whitespace
+        cleaned_lines = [
+            line.strip()
+            for line in lines
+            if line.strip()
+        ]
+
         return cleaned_lines
+
     except Exception as e:
         st.error(f"Terjadi kesalahan saat memproses struk: {e}")
         return []
@@ -119,7 +130,7 @@ uploaded_file = st.file_uploader("Unggah foto struk belanja (format .jpg atau .p
 
 if person_name and uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Struk yang diunggah", use_column_width=True)
+    st.image(image, caption="Struk yang diunggah", use_container_width=True)
 
     with st.spinner("Memproses struk..."):
         raw_items = process_receipt(image)
@@ -160,6 +171,11 @@ if person_name and uploaded_file:
 
         st.subheader(f"Total Pengeluaran {person_name}:")
         st.write(updated_history)
+        st.subheader("Visualisasi Pengeluaran")
+
+        chart_df = updated_history.set_index("Category")
+
+        st.bar_chart(chart_df)
 
         st.subheader("Status Anggaran:")
         if remaining_budget < 0:
