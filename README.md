@@ -5,9 +5,6 @@ OCR-powered expense tracking application built with Python, Streamlit, EasyOCR, 
 ## Live Demo
 🔗 https://receipt-tracker-xfjgadgbqzsxjc4jnqbwbe.streamlit.app
 
-## GitHub Repository
-🔗 https://github.com/ve-ltn/receipt-tracker
-
 ## Features
 - Upload receipt images
 - OCR text extraction
@@ -22,7 +19,7 @@ OCR-powered expense tracking application built with Python, Streamlit, EasyOCR, 
 - Pandas
 - NumPy
 
-## Try It Yourself!
+## Try It Out!
 You can test the application using the sample receipt available at:
 🔗 https://postimg.cc/R68vV81N
 The same sample image is also included in this repository under:
