@@ -139,10 +139,6 @@ if person_name and uploaded_file:
         st.subheader("Hasil OCR - Data Produk:")
         st.write(raw_items)
 
-        st.subheader("DEBUG OCR")
-        for item in raw_items:
-            st.write(repr(item))
-
         # Pengelompokkan Pengeluaran
         categorized_data = categorize_items(raw_items)
         st.subheader("Pengelompokkan Barang:")
