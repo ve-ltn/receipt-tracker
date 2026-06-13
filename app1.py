@@ -37,6 +37,8 @@ def process_receipt(image):
     except Exception as e:
         st.error(f"Terjadi kesalahan saat memproses struk: {e}")
         return []
+    
+
 
 # Fungsi untuk mengelompokkan barang ke kategori
 def categorize_items(items):
@@ -63,17 +65,24 @@ def categorize_items(items):
 
 
 # Fungsi untuk menghitung total pengeluaran per kategori
-def calculate_totals(categorized_items):
+def calculate_totals(categorized_items, all_lines):
     totals = {}
     for category, items in categorized_items.items():
         total = 0
         for item in items:
             try:
-                price_str = item.split()[-1].replace('Rp', '').replace(',', '').replace('.', '')
-                if price_str.isdigit():
-                    total += float(price_str)
-            except (IndexError, ValueError):
-                continue
+                idx = all_lines.index(item)
+                # Cari baris "Rp ..." terdekat setelah nama item (max 4 baris ke bawah)
+                for offset in range(1, 5):
+                    if idx + offset < len(all_lines):
+                        next_line = all_lines[idx + offset].strip()
+                        if next_line.lower().startswith('rp'):
+                            price_str = next_line.replace('Rp', '').replace('rp', '').replace('.', '').replace(',', '').strip()
+                            if price_str.isdigit():
+                                total += float(price_str)
+                                break
+            except (ValueError, IndexError):
+                pass
         totals[category] = total
     return totals
 
@@ -136,8 +145,9 @@ if person_name and uploaded_file:
         raw_items = process_receipt(image)
 
     if raw_items:
-        st.subheader("Hasil OCR - Data Produk:")
-        st.write(raw_items)
+        st.subheader("Raw OCR Output:")
+        for i, line in enumerate(raw_items):
+            st.write(f"{i}: {line}")  # Tambah ini sementara
 
         # Pengelompokkan Pengeluaran
         categorized_data = categorize_items(raw_items)
@@ -147,7 +157,7 @@ if person_name and uploaded_file:
             for item in items:
                 st.write(f"- {item}")
 
-        new_totals = calculate_totals(categorized_data)
+        new_totals = calculate_totals(categorized_data, raw_items)
 
         history_df = load_expenses_history(person_name)
 
@@ -170,6 +180,7 @@ if person_name and uploaded_file:
         remaining_budget = budget - total_expense_with_history  
 
         st.subheader(f"Total Pengeluaran {person_name}:")
+        st.info("💡 Angka di bawah ini adalah **akumulasi dari semua struk yang pernah diunggah**. Klik 'Reset Riwayat Pengeluaran' di sidebar untuk mulai dari awal.")
         st.write(updated_history)
         st.subheader("Visualisasi Pengeluaran")
 
